@@ -300,6 +300,9 @@ export default function App() {
                 handleCancel={handleCancel}
                 isSending={isSending}
                 isConnected={isConnected}
+                progress={progress}
+                results={results}
+                logs={logs}
               />
             } />
             <Route path="/all" element={

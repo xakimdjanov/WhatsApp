@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { Send, Ban, SendHorizonal, AlertCircle, Paperclip, X, FileText, Image as ImageIcon, Video } from 'lucide-react';
+import { Send, Ban, SendHorizonal, AlertCircle, Paperclip, X, FileText, Image as ImageIcon, Video, Loader2, CheckCircle2, Clock, Users } from 'lucide-react';
 
-export default function MessageComposer({ selectedCount, onSend, onCancel, isSending, isConnected }) {
+export default function MessageComposer({ selectedCount, onSend, onCancel, isSending, isConnected, progress, results }) {
   const [messageText, setMessageText] = useState('');
   const [mediaFiles, setMediaFiles] = useState([]);
   const fileInputRef = useRef(null);
@@ -228,8 +228,108 @@ export default function MessageComposer({ selectedCount, onSend, onCancel, isSen
         </div>
 
         {/* Action buttons */}
-        <div style={{ display: 'flex', gap: '1rem', marginTop: 'auto' }}>
-          {!isSending ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: 'auto' }}>
+          {isSending && progress ? (
+            <>
+              {/* Progress Stats Cards */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: '0.6rem'
+              }}>
+                {/* Jami */}
+                <div style={{
+                  background: 'rgba(139,92,246,0.1)',
+                  border: '1px solid rgba(139,92,246,0.25)',
+                  borderRadius: '10px',
+                  padding: '0.65rem 0.5rem',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem', marginBottom: '0.25rem' }}>
+                    <Users size={13} style={{ color: 'var(--accent-purple)' }} />
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 600 }}>JAMI</span>
+                  </div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-purple)' }}>
+                    {progress.total || selectedCount}
+                  </div>
+                </div>
+
+                {/* Jo'natildi */}
+                <div style={{
+                  background: 'rgba(16,185,129,0.1)',
+                  border: '1px solid rgba(16,185,129,0.25)',
+                  borderRadius: '10px',
+                  padding: '0.65rem 0.5rem',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem', marginBottom: '0.25rem' }}>
+                    <CheckCircle2 size={13} style={{ color: 'var(--success)' }} />
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 600 }}>JO'NATILDI</span>
+                  </div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--success)' }}>
+                    {progress.current || 0}
+                  </div>
+                </div>
+
+                {/* Qoldi */}
+                <div style={{
+                  background: 'rgba(251,191,36,0.1)',
+                  border: '1px solid rgba(251,191,36,0.25)',
+                  borderRadius: '10px',
+                  padding: '0.65rem 0.5rem',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem', marginBottom: '0.25rem' }}>
+                    <Clock size={13} style={{ color: '#fbbf24' }} />
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 600 }}>QOLDI</span>
+                  </div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fbbf24' }}>
+                    {Math.max(0, (progress.total || selectedCount) - (progress.current || 0))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Progress Bar */}
+              <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '99px', overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%',
+                  width: `${progress.total ? Math.round((progress.current / progress.total) * 100) : 0}%`,
+                  background: 'linear-gradient(90deg, var(--accent-purple), var(--success))',
+                  borderRadius: '99px',
+                  transition: 'width 0.5s ease'
+                }} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <Loader2 size={12} style={{ animation: 'spin 1s linear infinite', color: 'var(--accent-purple)' }} />
+                  Jo'natilmoqda...
+                </span>
+                <span style={{ fontWeight: 700, color: 'var(--accent-purple)' }}>
+                  {progress.total ? Math.round((progress.current / progress.total) * 100) : 0}%
+                </span>
+              </div>
+
+              {/* Cancel Button */}
+              <button
+                type="button"
+                onClick={onCancel}
+                className="btn btn-danger"
+                style={{ padding: '0.85rem' }}
+              >
+                <Ban size={18} /> Jo'natishni to'xtatish
+              </button>
+            </>
+          ) : isSending ? (
+            /* Fallback loader if no progress data yet */
+            <button
+              type="button"
+              onClick={onCancel}
+              className="btn btn-danger"
+              style={{ padding: '0.85rem' }}
+            >
+              <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> Jo'natishni to'xtatish
+            </button>
+          ) : (
             <button
               type="submit"
               className="btn btn-primary"
@@ -237,15 +337,6 @@ export default function MessageComposer({ selectedCount, onSend, onCancel, isSen
               style={{ flex: 1, padding: '0.9rem' }}
             >
               <SendHorizonal size={18} /> Jo'natishni boshlash
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={onCancel}
-              className="btn btn-danger"
-              style={{ flex: 1, padding: '0.9rem' }}
-            >
-              <Ban size={18} /> To'xtatish (Cancel)
             </button>
           )}
         </div>

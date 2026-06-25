@@ -9,7 +9,10 @@ export default function BulkChatPanel({
   handleSend, 
   handleCancel, 
   isSending, 
-  isConnected 
+  isConnected,
+  progress,
+  results,
+  logs
 }) {
   return (
     <div style={{ 
@@ -35,6 +38,8 @@ export default function BulkChatPanel({
           onCancel={handleCancel}
           isSending={isSending}
           isConnected={isConnected}
+          progress={progress}
+          results={results}
         />
       </div>
     </div>
