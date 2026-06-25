@@ -1,7 +1,7 @@
 import React from 'react';
 import { QrCode, Wifi, WifiOff, Loader2, LogOut, CheckCircle2 } from 'lucide-react';
 
-export default function ConnectionPanel({ status, qr, user, onLogout }) {
+export default function ConnectionPanel({ status, qr, user, onLogout, onRequestTakeover }) {
   return (
     <div className={`glass-card ${status === 'SCAN_QR' ? 'pulse-card' : ''} fade-in`}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
@@ -17,6 +17,10 @@ export default function ConnectionPanel({ status, qr, user, onLogout }) {
           ) : status === 'SCAN_QR' ? (
             <>
               <QrCode style={{ color: 'var(--accent-pink)' }} /> Bog'lanish holati: <span style={{ color: 'var(--accent-pink)' }}>QR Skanerlash</span>
+            </>
+          ) : status === 'CONNECTED_OTHER_DEVICE' ? (
+            <>
+              <WifiOff style={{ color: '#ef4444' }} /> Bog'lanish holati: <span style={{ color: '#ef4444' }}>Band (Boshqa qurilma)</span>
             </>
           ) : (
             <>
@@ -125,6 +129,44 @@ export default function ConnectionPanel({ status, qr, user, onLogout }) {
           <div style={{ textAlign: 'center', padding: '2rem 0' }}>
             <Loader2 className="spin" size={48} style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }} />
             <p style={{ color: 'var(--text-secondary)' }}>Ulanish kutilmoqda. Aloqa tiklanmoqda...</p>
+          </div>
+        )}
+
+        {status === 'CONNECTED_OTHER_DEVICE' && (
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '2.5rem 1.5rem', 
+            background: 'rgba(239, 68, 68, 0.08)', 
+            borderRadius: '16px', 
+            border: '1px solid rgba(239, 68, 68, 0.2)', 
+            width: '100%',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
+          }}>
+            <WifiOff size={48} style={{ color: '#ef4444', marginBottom: '1.2rem' }} />
+            <h3 style={{ color: 'white', fontWeight: 600, fontSize: '1.3rem', margin: '0 0 0.5rem 0' }}>Boshqa qurilma ulangan</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', maxWidth: '500px', margin: '0 auto 1.5rem', lineHeight: '1.6' }}>
+              WhatsApp hozirda boshqa brauzer yoki kompyuter orqali faol bog'langan. Ushbu qurilma panelga kirishi uchun avvalgi qurilmadagi ulanish uzilishi kerak.
+            </p>
+            <button 
+              className="btn btn-primary" 
+              onClick={onRequestTakeover} 
+              style={{ 
+                padding: '0.8rem 1.6rem', 
+                fontSize: '0.95rem', 
+                fontWeight: 700, 
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, var(--accent-purple), var(--accent-pink))',
+                border: 'none',
+                color: 'white',
+                cursor: 'pointer',
+                boxShadow: '0 6px 20px rgba(139, 92, 246, 0.3)',
+                transition: 'transform 0.2s ease'
+              }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+            >
+              Ulanishni bu yerga o‘tkazish (Takeover)
+            </button>
           </div>
         )}
       </div>
