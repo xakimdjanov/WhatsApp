@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { MessageSquare, ShieldCheck, Menu } from 'lucide-react';
+import { MessageSquare, ShieldCheck, Menu, Lock, LogIn, LogOut } from 'lucide-react';
 import ConnectionPanel from './components/ConnectionPanel';
 import Sidebar from './components/Sidebar';
 import BulkChatPanel from './components/BulkChatPanel';
@@ -10,8 +10,156 @@ import { useNotification } from './components/NotificationProvider';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
+function LoginScreen({ onLogin }) {
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Noto‘g‘ri parol');
+      }
+
+      onLogin(data.token);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '100vh',
+      background: 'radial-gradient(circle at top, rgba(0, 168, 132, 0.1), transparent 35%), #0c1317',
+      color: '#e9edef',
+      padding: '1.5rem'
+    }}>
+      <div style={{
+        width: '100%',
+        maxWidth: '420px',
+        background: '#111b21',
+        borderRadius: '20px',
+        border: '1px solid #222e35',
+        boxShadow: '0 16px 40px rgba(0,0,0,0.5)',
+        padding: '2.5rem 2rem',
+        textAlign: 'center'
+      }}>
+        <div style={{
+          width: '60px',
+          height: '60px',
+          background: 'rgba(0, 168, 132, 0.1)',
+          borderRadius: '50%',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: '1.5rem',
+          color: '#00a884',
+          border: '1px solid rgba(0, 168, 132, 0.2)'
+        }}>
+          <Lock size={28} />
+        </div>
+
+        <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700, color: 'white' }}>Tizimga kirish</h2>
+        <p style={{ margin: '0.5rem 0 2rem', fontSize: '0.88rem', color: '#8696a0' }}>
+          WhatsApp Bulk Messenger paneliga kirish uchun parolni kiriting.
+        </p>
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+          <div style={{ position: 'relative', textAlign: 'left' }}>
+            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#8696a0', display: 'block', marginBottom: '0.4rem' }}>
+              Admin Parol
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Parolni kiriting..."
+              required
+              style={{
+                width: '100%',
+                padding: '0.85rem 1rem',
+                borderRadius: '10px',
+                border: '1px solid #222e35',
+                background: '#2a3942',
+                color: 'white',
+                fontSize: '0.95rem',
+                outline: 'none',
+                transition: 'border-color 0.2s ease'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#00a884'}
+              onBlur={(e) => e.target.style.borderColor = '#222e35'}
+            />
+          </div>
+
+          {error && (
+            <div style={{
+              color: '#ef4444',
+              background: 'rgba(239, 68, 68, 0.1)',
+              padding: '0.75rem',
+              borderRadius: '8px',
+              fontSize: '0.85rem',
+              border: '1px solid rgba(239, 68, 68, 0.2)',
+              textAlign: 'left'
+            }}>
+              ✗ {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: '100%',
+              padding: '0.9rem',
+              borderRadius: '10px',
+              border: 'none',
+              background: '#00a884',
+              color: '#0b141a',
+              fontWeight: 700,
+              fontSize: '0.95rem',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              transition: 'opacity 0.2s ease',
+              marginTop: '0.5rem'
+            }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
+            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+          >
+            {loading ? 'Tekshirilmoqda...' : (
+              <>
+                <LogIn size={18} />
+                <span>Kirish</span>
+              </>
+            )}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const { showToast, confirmAction } = useNotification();
+  const [token, setToken] = useState(localStorage.getItem('admin_token'));
   const [connection, setConnection] = useState({ status: 'DISCONNECTED', qr: null, user: null });
   const [chats, setChats] = useState([]);
   const [selectedChats, setSelectedChats] = useState([]);
@@ -46,13 +194,26 @@ export default function App() {
   }, [selectedChat]);
 
   useEffect(() => {
-    // Connect to Backend Socket Server
-    const socket = io(BACKEND_URL);
+    if (!token) return;
+
+    // Connect to Backend Socket Server with token
+    const socket = io(BACKEND_URL, {
+      auth: { token }
+    });
     socketRef.current = socket;
 
     socket.on('connect', () => {
       console.log('Connected to socket server');
       socket.emit('get-status');
+    });
+
+    socket.on('connect_error', (err) => {
+      console.error('Socket connection error:', err.message);
+      if (err.message === 'Unauthorized') {
+        showToast('Ruxsat etilmadi yoki token eskirgan. Qayta kiring.', 'error');
+        localStorage.removeItem('admin_token');
+        setToken(null);
+      }
     });
 
     socket.on('connection-status', (data) => {
@@ -147,14 +308,26 @@ export default function App() {
     return () => {
       if (socket) socket.disconnect();
     };
-  }, []);
+  }, [token]);
 
   const handleLogout = () => {
     confirmAction({
-      title: "Tizimdan chiqish",
-      message: "WhatsApp seansini tugatib, tizimdan chiqmoqchimisiz?",
+      title: "WhatsAppni uzish",
+      message: "WhatsApp ulanish seansini tugatib, o‘chirishni tasdiqlaysizmi?",
       onConfirm: () => {
         socketRef.current?.emit('logout');
+      }
+    });
+  };
+
+  const handleWebsiteLogout = () => {
+    confirmAction({
+      title: "Saytdan chiqish",
+      message: "Ushbu qurilmadan panel seansini yopmoqchimisiz? (WhatsApp ulanishi uzilmaydi)",
+      onConfirm: () => {
+        localStorage.removeItem('admin_token');
+        setToken(null);
+        showToast('Tizimdan muvaffaqiyatli chiqildi.', 'success');
       }
     });
   };
@@ -216,6 +389,10 @@ export default function App() {
 
   const isConnected = connection.status === 'CONNECTED';
 
+  if (!token) {
+    return <LoginScreen onLogin={(tok) => { localStorage.setItem('admin_token', tok); setToken(tok); }} />;
+  }
+
   if (isConnected) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-primary)' }}>
@@ -224,6 +401,7 @@ export default function App() {
         <Sidebar
           connection={connection}
           onLogout={handleLogout}
+          onWebsiteLogout={handleWebsiteLogout}
           chats={directChats}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
@@ -380,9 +558,33 @@ export default function App() {
           </div>
           <h1>WhatsApp Bulk Messenger</h1>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-          <ShieldCheck size={16} style={{ color: 'var(--success)' }} />
-          <span>Xavfsiz ulanish</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+            <ShieldCheck size={16} style={{ color: 'var(--success)' }} />
+            <span>Xavfsiz ulanish</span>
+          </div>
+          <button
+            onClick={handleWebsiteLogout}
+            style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              color: '#aebac1',
+              padding: '0.4rem 0.8rem',
+              borderRadius: '8px',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'}
+          >
+            <LogOut size={14} />
+            <span>Chiqish</span>
+          </button>
         </div>
       </header>
 

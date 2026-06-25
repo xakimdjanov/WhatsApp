@@ -1,8 +1,8 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { MessageSquare, Send, LogOut, X, ArrowLeft, Users, Mail } from 'lucide-react';
+import { MessageSquare, Send, LogOut, X, Users, Mail } from 'lucide-react';
 
-export default function Sidebar({ connection, onLogout, chats = [], isOpen, onClose }) {
+export default function Sidebar({ connection, onLogout, onWebsiteLogout, chats = [], isOpen, onClose }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -60,175 +60,115 @@ export default function Sidebar({ connection, onLogout, chats = [], isOpen, onCl
         width: '300px',
         background: '#111b21',
         borderRight: '1px solid #222e35',
+        zIndex: 201,
         display: 'flex',
         flexDirection: 'column',
-        zIndex: 201,
         transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
-        transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        boxShadow: isOpen ? '4px 0 30px rgba(0,0,0,0.5)' : 'none'
+        transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+        boxShadow: isOpen ? '10px 0 30px rgba(0,0,0,0.5)' : 'none'
       }}>
-
-        {/* Header */}
+        {/* Sidebar Header */}
         <div style={{
+          padding: '1.25rem 1.5rem',
+          borderBottom: '1px solid #222e35',
           display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-          padding: '1rem 1.25rem',
-          background: '#202c33',
-          borderBottom: '1px solid #222e35'
+          justifyContent: 'space-between',
+          alignItems: 'center'
         }}>
-          {/* Back / Close Button */}
-          <button
-            onClick={onClose}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: '#aebac1',
-              cursor: 'pointer',
-              padding: '0.4rem',
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{
+              background: '#00a884',
+              width: '38px',
+              height: '38px',
               borderRadius: '50%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              transition: 'all 0.2s ease',
-              flexShrink: 0
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
-              e.currentTarget.style.color = 'white';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = '#aebac1';
-            }}
-            title="Yopish"
-          >
-            <ArrowLeft size={20} />
-          </button>
-
-          {/* Brand */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1 }}>
-            <div style={{
-              background: '#00a884',
-              padding: '0.35rem',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              boxShadow: '0 2px 8px rgba(0, 168, 132, 0.3)'
             }}>
               <MessageSquare size={18} style={{ color: '#0b141a' }} />
             </div>
-            <span style={{ fontWeight: 700, fontSize: '1rem', color: 'white', letterSpacing: '0.3px' }}>
-              WA Messenger
-            </span>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'white', lineHeight: 1.2 }}>WA Control</span>
+              <span style={{ fontSize: '0.75rem', color: '#00a884', fontWeight: 500 }}>Onlayn</span>
+            </div>
           </div>
-
-          {/* X close button */}
           <button
             onClick={onClose}
             style={{
               background: 'transparent',
               border: 'none',
-              color: '#aebac1',
+              color: '#8696a0',
               cursor: 'pointer',
-              padding: '0.4rem',
+              padding: '0.25rem',
               borderRadius: '50%',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
-              e.currentTarget.style.color = 'white';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = '#aebac1';
+              justifyContent: 'center'
             }}
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
-        {/* User Profile */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-          padding: '1.1rem 1.25rem',
-          borderBottom: '1px solid #222e35',
-          background: '#111b21'
-        }}>
+        {/* User Info (if connected) */}
+        {connection.status === 'CONNECTED' && (
           <div style={{
-            width: '42px',
-            height: '42px',
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, #00a884, #007a61)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            boxShadow: '0 2px 8px rgba(0,168,132,0.3)'
+            padding: '1.25rem 1.5rem',
+            background: 'rgba(0, 168, 132, 0.04)',
+            borderBottom: '1px solid #222e35'
           }}>
-            <Users size={20} style={{ color: 'white' }} />
-          </div>
-          <div style={{ overflow: 'hidden', flex: 1 }}>
-            <div style={{
-              fontWeight: 600,
-              fontSize: '0.9rem',
-              color: '#e9edef',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-            }}>
+            <div style={{ fontSize: '0.75rem', color: '#8696a0', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.4rem' }}>
+              Ulanish
+            </div>
+            <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#e9edef' }}>
               {userName}
             </div>
-            <div style={{
-              fontSize: '0.75rem',
-              color: '#8696a0',
-              marginTop: '0.1rem'
-            }}>
-              {userPhone ? `+${userPhone}` : 'Bog\'langan'}
+            <div style={{ fontSize: '0.8rem', color: '#8696a0', marginTop: '0.1rem' }}>
+              +{userPhone}
             </div>
           </div>
-          <div style={{
-            width: '10px',
-            height: '10px',
-            borderRadius: '50%',
-            background: '#00a884',
-            boxShadow: '0 0 6px rgba(0,168,132,0.6)',
-            flexShrink: 0
-          }} />
-        </div>
+        )}
 
-        {/* Navigation Section Label */}
-        <div style={{
-          padding: '1rem 1.25rem 0.4rem',
-          fontSize: '0.72rem',
-          fontWeight: 700,
-          color: '#8696a0',
-          letterSpacing: '0.08em',
-          textTransform: 'uppercase'
-        }}>
-          Bo'limlar
-        </div>
+        {/* Nav Links */}
+        <div style={{ padding: '1.25rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          {/* Ommaviy xabarnoma */}
+          <button
+            onClick={() => handleNav('/bulk')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.85rem',
+              padding: '0.75rem 1rem',
+              borderRadius: '10px',
+              background: activeTab === 'bulk' ? 'rgba(0, 168, 132, 0.1)' : 'transparent',
+              color: activeTab === 'bulk' ? '#00a884' : '#aebac1',
+              border: 'none',
+              fontWeight: 600,
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              textAlign: 'left',
+              width: '100%',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={e => {
+              if (activeTab !== 'bulk') {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+                e.currentTarget.style.color = 'white';
+              }
+            }}
+            onMouseLeave={e => {
+              if (activeTab !== 'bulk') {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = '#aebac1';
+              }
+            }}
+          >
+            <Send size={18} />
+            <span>Ommaviy xabarnoma</span>
+          </button>
 
-        {/* Navigation Items */}
-        <div style={{ padding: '0 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-
-          {/* Chatlar bo'limi */}
-          <div style={{
-            padding: '0.5rem 0.75rem 0.3rem',
-            fontSize: '0.7rem',
-            fontWeight: 600,
-            color: '#00a884',
-            letterSpacing: '0.05em',
-            textTransform: 'uppercase'
-          }}>
-            💬 Chatlar
-          </div>
-
+          {/* Barcha chatlar */}
           <button
             onClick={() => handleNav('/all')}
             style={{
@@ -237,10 +177,10 @@ export default function Sidebar({ connection, onLogout, chats = [], isOpen, onCl
               gap: '0.85rem',
               padding: '0.75rem 1rem',
               borderRadius: '10px',
-              background: activeTab === 'all' ? 'rgba(0,168,132,0.15)' : 'transparent',
+              background: activeTab === 'all' ? 'rgba(0, 168, 132, 0.1)' : 'transparent',
               color: activeTab === 'all' ? '#00a884' : '#aebac1',
-              border: activeTab === 'all' ? '1px solid rgba(0,168,132,0.25)' : '1px solid transparent',
-              fontWeight: activeTab === 'all' ? 700 : 500,
+              border: 'none',
+              fontWeight: 600,
               fontSize: '0.9rem',
               cursor: 'pointer',
               textAlign: 'left',
@@ -249,8 +189,8 @@ export default function Sidebar({ connection, onLogout, chats = [], isOpen, onCl
             }}
             onMouseEnter={e => {
               if (activeTab !== 'all') {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-                e.currentTarget.style.color = '#e9edef';
+                e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+                e.currentTarget.style.color = 'white';
               }
             }}
             onMouseLeave={e => {
@@ -260,10 +200,11 @@ export default function Sidebar({ connection, onLogout, chats = [], isOpen, onCl
               }
             }}
           >
-            <MessageSquare size={18} />
+            <Users size={18} />
             <span>Barcha chatlar</span>
           </button>
 
+          {/* O'qilmagan chatlar */}
           <button
             onClick={() => handleNav('/unread')}
             style={{
@@ -272,10 +213,10 @@ export default function Sidebar({ connection, onLogout, chats = [], isOpen, onCl
               justifyContent: 'space-between',
               padding: '0.75rem 1rem',
               borderRadius: '10px',
-              background: activeTab === 'unread' ? 'rgba(0,168,132,0.15)' : 'transparent',
+              background: activeTab === 'unread' ? 'rgba(0, 168, 132, 0.1)' : 'transparent',
               color: activeTab === 'unread' ? '#00a884' : '#aebac1',
-              border: activeTab === 'unread' ? '1px solid rgba(0,168,132,0.25)' : '1px solid transparent',
-              fontWeight: activeTab === 'unread' ? 700 : 500,
+              border: 'none',
+              fontWeight: 600,
               fontSize: '0.9rem',
               cursor: 'pointer',
               width: '100%',
@@ -283,8 +224,8 @@ export default function Sidebar({ connection, onLogout, chats = [], isOpen, onCl
             }}
             onMouseEnter={e => {
               if (activeTab !== 'unread') {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-                e.currentTarget.style.color = '#e9edef';
+                e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+                e.currentTarget.style.color = 'white';
               }
             }}
             onMouseLeave={e => {
@@ -295,22 +236,19 @@ export default function Sidebar({ connection, onLogout, chats = [], isOpen, onCl
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-              <MessageSquare size={18} />
-              <span>O'qilmaganlar</span>
+              <Mail size={18} />
+              <span>O'qilmagan chatlar</span>
             </div>
             {unreadChatsCount > 0 && (
               <span style={{
                 background: '#00a884',
                 color: '#0b141a',
-                fontSize: '0.7rem',
+                fontSize: '0.75rem',
                 fontWeight: 700,
-                borderRadius: '50%',
+                padding: '0.15rem 0.4rem',
+                borderRadius: '10px',
                 minWidth: '20px',
-                height: '20px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '0 4px'
+                textAlign: 'center'
               }}>
                 {unreadChatsCount}
               </span>
@@ -372,8 +310,39 @@ export default function Sidebar({ connection, onLogout, chats = [], isOpen, onCl
         {/* Divider */}
         <div style={{ height: '1px', background: '#222e35', margin: '0 1.25rem' }} />
 
-        {/* Logout button */}
-        <div style={{ padding: '1rem 1.25rem' }}>
+        {/* Logout buttons */}
+        <div style={{ padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {/* Website Logout */}
+          <button
+            onClick={() => { onClose(); onWebsiteLogout(); }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.85rem',
+              padding: '0.75rem 1rem',
+              borderRadius: '10px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              color: '#aebac1',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              fontWeight: 600,
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              textAlign: 'left',
+              width: '100%',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+            }}
+          >
+            <LogOut size={18} />
+            <span>Saytdan chiqish</span>
+          </button>
+
+          {/* WhatsApp Disconnect */}
           <button
             onClick={handleLogoutClick}
             style={{
@@ -402,7 +371,7 @@ export default function Sidebar({ connection, onLogout, chats = [], isOpen, onCl
             }}
           >
             <LogOut size={18} />
-            <span>Chiqish</span>
+            <span>WhatsAppni uzish</span>
           </button>
         </div>
       </div>
